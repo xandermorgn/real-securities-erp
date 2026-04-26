@@ -1,26 +1,79 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0f172a;
 }
 
 @theme inline {
-  --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  background: #ffffff;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Glass cards — minimal, clean, production-grade */
+.glass-card {
+  border-radius: 1rem;
+  border: 1px solid rgb(226 232 240 / 0.6);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(248, 250, 252, 0.92) 100%
+  );
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    0 4px 12px -2px rgba(15, 23, 42, 0.06);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.glass-card:hover {
+  border-color: rgb(203 213 225 / 0.8);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 6px 16px -2px rgba(15, 23, 42, 0.08);
+}
+
+.glass {
+  border-radius: 0.75rem;
+  border: 1px solid rgb(226 232 240);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+}
+
+.glass-input {
+  border-radius: 0.75rem;
+  border: 1px solid rgb(226 232 240 / 0.8);
+  background: #ffffff;
+  color: #0f172a;
+  transition: all 0.15s ease;
+}
+
+.glass-input:focus {
+  border-color: rgb(100 116 139);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.1);
+  background: #fafbfc;
+}
+
+.glass-shell {
+  border-radius: 1.25rem;
+  border: 1px solid rgb(226 232 240);
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }

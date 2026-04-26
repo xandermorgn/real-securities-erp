@@ -1,36 +1,160 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Real Securities ERP System - Owner Panel
 
-## Getting Started
+A comprehensive ERP system for Real Security Investigations, built with Next.js, TypeScript, and Express.
 
-First, run the development server:
+## Features
 
+- **Dashboard**: Real-time attendance overview and statistics
+- **Staff Management**: Complete CRUD operations for security staff
+- **Area Management**: Organize security zones and areas
+- **Points Management**: Manage security checkpoints
+- **Roles & Users**: User management with role-based access
+
+## Tech Stack
+
+### Frontend
+- Next.js 16 (App Router)
+- React 19 + TypeScript
+- TailwindCSS (Glassmorphism UI)
+- Radix UI Components
+- Lucide React Icons
+
+### Backend
+- Node.js + Express
+- TypeScript
+- REST API
+
+### Database
+- Supabase (PostgreSQL)
+- Supabase Storage
+
+## Installation
+
+1. Install dependencies:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Set up environment variables:
+Copy `.env.example` to `.env.local` and fill in your Supabase credentials:
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url_here
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key_here
+JWT_SECRET=your_jwt_secret_key_here
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Set up the database:
+- Go to your Supabase project
+- Run the SQL schema in `lib/database-schema.sql`
+- Create storage buckets: `staff-photos` and `documents`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Running the Application
 
-## Learn More
+### Development Mode
 
-To learn more about Next.js, take a look at the following resources:
+Run both frontend and backend together:
+```bash
+npm run start:full
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Or run them separately:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Frontend (Next.js on port 3000):
+```bash
+npm run dev
+```
 
-## Deploy on Vercel
+Backend API (Express on port 4000):
+```bash
+npm run api
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Access the Application
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Frontend: http://localhost:3000
+- API: http://localhost:4000
+- API Health Check: http://localhost:4000/api/health
+
+## Project Structure
+
+```
+real-securities-erp/
+├── app/                    # Next.js App Router pages
+│   ├── page.tsx           # Dashboard
+│   ├── staff/             # Staff management
+│   ├── areas/             # Area management
+│   ├── points/            # Points management
+│   └── roles/             # User roles
+├── api/                    # Express API server
+│   └── server.ts          # API routes and logic
+├── components/            # Reusable UI components
+├── lib/                   # Utilities and configs
+├── types/                 # TypeScript type definitions
+└── public/                # Static assets (logo, favicon)
+```
+
+## Default Data
+
+The system comes with pre-configured:
+
+### Shifts
+- 8 AM - 8 PM
+- 8 PM - 8 AM
+- 8 AM - 4 PM
+- 4 PM - 12 AM
+- 12 AM - 8 AM
+
+### Designations
+- Guard
+- Supervisor
+- Head Guard
+- Dog Squad
+- Security Officer
+- Gunman
+- Laborer
+- Forklift
+- OP
+- BO
+- Housekeeping
+
+## Design System
+
+The UI uses a custom glassmorphism design with:
+- Frosted glass effect cards
+- Backdrop blur
+- Translucent overlays
+- Mobile-first responsive layout
+- Dark gradient background
+
+## API Endpoints
+
+### Dashboard
+- `GET /api/dashboard/attendance` - Get attendance stats
+
+### Staff
+- `GET /api/staff` - List all staff
+- `GET /api/staff/:id` - Get staff details
+- `POST /api/staff` - Create staff
+- `PUT /api/staff/:id` - Update staff
+- `DELETE /api/staff/:id` - Delete staff
+
+### Areas & Points
+- `GET /api/areas` - List areas
+- `POST /api/areas` - Create area
+- `GET /api/points` - List points
+- `POST /api/points` - Create point
+
+### System
+- `GET /api/shifts` - Get shifts
+- `GET /api/designations` - Get designations
+- `GET /api/users` - List users
+- `POST /api/users` - Create user
+
+## License
+
+Private - Real Security Investigations
+
+## Support
+
+For issues or questions, contact the development team.
