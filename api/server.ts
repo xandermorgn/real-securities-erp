@@ -6,11 +6,36 @@ import bcrypt from 'bcrypt';
 import bcryptjs from 'bcryptjs';
 import { createClient } from '@supabase/supabase-js';
 import { generateToken, verifyToken, type TokenPayload } from '../lib/auth';
+import Database from 'better-sqlite3';
+import path from 'path';
+import fs from 'fs';
 
 dotenv.config({ path: '.env.local' });
 
 const app: Express = express();
 const port = process.env.API_PORT || 4001;
+
+// ── Local SQLite for image storage ───────────────────────────────────────────
+const UPLOADS_DIR = path.join(__dirname, '..', 'uploads');
+if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+
+const imageDb = new Database(path.join(UPLOADS_DIR, 'images.db'));
+imageDb.pragma('journal_mode = WAL');
+imageDb.exec(`
+  CREATE TABLE IF NOT EXISTS images (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    filename TEXT NOT NULL UNIQUE,
+    original_name TEXT NOT NULL,
+    mime_type TEXT NOT NULL,
+    size_bytes INTEGER NOT NULL DEFAULT 0,
+    image_type TEXT,
+    staff_id TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+  CREATE INDEX IF NOT EXISTS idx_images_staff ON images(staff_id);
+  CREATE INDEX IF NOT EXISTS idx_images_type ON images(image_type);
+`);
+console.log('[sqlite]: ✓ Image database ready');
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -364,23 +389,42 @@ app.get('/api/dashboard/daily-matrix', requireAuth, async (req: Request, res: Re
   }
 });
 
-// ── File Upload ───────────────────────────────────────────────────────────────
+// ── File Upload (local filesystem + SQLite) ──────────────────────────────────
+
+app.use('/api/uploads', express.static(UPLOADS_DIR, {
+  maxAge: '7d',
+  immutable: true,
+  setHeaders(res, filePath) {
+    const ext = path.extname(filePath).toLowerCase();
+    const mimeMap: Record<string, string> = {
+      '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png',
+      '.gif': 'image/gif', '.webp': 'image/webp', '.pdf': 'application/pdf',
+      '.svg': 'image/svg+xml',
+    };
+    if (mimeMap[ext]) res.setHeader('Content-Type', mimeMap[ext]);
+  },
+}));
 
 app.post('/api/upload', async (req: Request, res: Response) => {
-  if (!supabase) return res.status(503).json({ error: 'Database not configured — cannot upload files without Supabase.' });
-  const { base64, mimeType, filename } = req.body as Record<string, string>;
+  const { base64, mimeType, filename, imageType, staffId } = req.body as Record<string, string>;
   if (!base64 || !filename) return res.status(400).json({ error: 'base64 and filename are required' });
   try {
     const raw = base64.includes(',') ? base64.split(',')[1] : base64;
     const buffer = Buffer.from(raw, 'base64');
     const safeName = filename.replace(/[^a-zA-Z0-9._\-]/g, '_');
-    const path = `${Date.now()}-${safeName}`;
-    const { data: up, error: upErr } = await supabase.storage
-      .from('staff-files')
-      .upload(path, buffer, { contentType: mimeType || 'application/octet-stream', upsert: true });
-    if (upErr) throw upErr;
-    const { data: urlData } = supabase.storage.from('staff-files').getPublicUrl(up.path);
-    res.json({ url: urlData.publicUrl });
+    const storedName = `${Date.now()}-${safeName}`;
+    const filePath = path.join(UPLOADS_DIR, storedName);
+
+    fs.writeFileSync(filePath, buffer);
+
+    const stmt = imageDb.prepare(
+      'INSERT INTO images (filename, original_name, mime_type, size_bytes, image_type, staff_id) VALUES (?, ?, ?, ?, ?, ?)'
+    );
+    stmt.run(storedName, filename, mimeType || 'application/octet-stream', buffer.length, imageType || null, staffId || null);
+
+    const apiBase = `${req.protocol}://${req.get('host')}`;
+    const url = `${apiBase}/api/uploads/${storedName}`;
+    res.json({ url, filename: storedName });
   } catch (e) {
     res.status(500).json({ error: errMsg(e) });
   }
