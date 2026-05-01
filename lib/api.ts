@@ -1,5 +1,5 @@
 export function apiUrl(path: string): string {
-  const raw = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+  const raw = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
   const base = raw.replace(/\/$/, '');
   const p = path.startsWith('/') ? path : `/${path}`;
   if (base.endsWith('/api')) {
@@ -23,7 +23,7 @@ export async function apiJson<T = unknown>(
     res = await fetch(apiUrl(path), init);
   } catch {
     throw new Error(
-      'Cannot reach API server. Please ensure the API is running on port 4001.'
+      'Cannot reach API server. Please ensure the server is running on port 3000.'
     );
   }
   const text = await res.text();

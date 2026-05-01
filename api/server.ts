@@ -2362,8 +2362,11 @@ app.get('/api/fix-db', async (_req: Request, res: Response) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`[server]: Running at http://localhost:${port}`);
-});
+// Only listen if this file is run directly (not imported)
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log(`[server]: Running at http://localhost:${port}`);
+  });
+}
 
 export default app;

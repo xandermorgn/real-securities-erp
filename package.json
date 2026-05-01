@@ -3,13 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 4000",
-    "dev:all": "concurrently \"next dev -p 4000\" \"npm run api\"",
+    "dev": "ts-node --project tsconfig.server.json server.ts",
+    "dev:legacy": "concurrently \"next dev -p 4000\" \"npm run api\"",
     "api": "ts-node --project tsconfig.server.json api/server.ts",
     "api:dev": "nodemon --watch api --ext ts,json --exec \"ts-node --project tsconfig.server.json api/server.ts\"",
     "start:full": "concurrently \"npm run api:dev\" \"next dev -p 4000\"",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 3000",
+    "start:prod": "ts-node --project tsconfig.server.json server.ts",
     "lint": "eslint"
   },
   "dependencies": {
